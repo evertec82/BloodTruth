@@ -7,7 +7,7 @@ if (-not $NoGui -and -not $ValidateOnly) {
  Add-Type -AssemblyName System.Drawing
  [Windows.Forms.Application]::EnableVisualStyles()
  $form=New-Object Windows.Forms.Form
- $form.Text='Blood & Truth PC VR - v0.1.0 prototype'
+ $form.Text='Blood & Truth PC VR - v0.1.5 prototype'
  $form.ClientSize=New-Object Drawing.Size(580,260)
  $form.StartPosition='CenterScreen'
  $label=New-Object Windows.Forms.Label
@@ -29,6 +29,22 @@ if (-not $NoGui -and -not $ValidateOnly) {
  $play.Text='Start Blood & Truth'; $play.SetBounds(380,205,185,32); $play.DialogResult='OK'; $form.Controls.Add($play); $form.AcceptButton=$play
  if ($form.ShowDialog() -ne 'OK') { $form.Dispose(); return }
  $GamePath=$pathBox.Text; $MirrorFps=@(30,60,0)[$mirror.SelectedIndex]; $Resolution=@('Original','High','Ultra8x')[$resolutionBox.SelectedIndex]; $form.Dispose()
+}
+. (Join-Path $PSScriptRoot 'expand-package.ps1')
+# If the game is still a .pkg (given as the path, or found in the games folder when no unpacked
+# game exists), unpack it first. A validation run never unpacks anything.
+if (-not $ValidateOnly) {
+ $gamesFolder=Join-Path $root 'games'
+ $package=$null
+ if ([System.IO.Path]::GetExtension($GamePath) -ieq '.pkg') { $package=$GamePath }
+ elseif (-not (Test-Path -LiteralPath $GamePath)) { $found=Find-GamePackage $gamesFolder; if ($found) { $package=$found.FullName } }
+ if ($package) {
+  if (-not $NoGui) {
+   $answer=[Windows.Forms.MessageBox]::Show("The game is a package:`n`n$package`n`nIt has to be unpacked once before it can be played. Unpack it now?",'Blood & Truth PC VR','YesNo','Question')
+   if ($answer -ne 'Yes') { return }
+  }
+  $GamePath=Expand-GamePackage -PackagePath $package -GamesFolder $gamesFolder -LauncherFolder $PSScriptRoot -Root $root
+ }
 }
 if (-not (Test-Path -LiteralPath $GamePath)) { throw 'The complete extracted CUSA11108 game is required at games/CUSA11108/files/uroot.' }
 if ((Get-FileHash -LiteralPath $GamePath).Hash -ne '9312B61DAF0AC023F66203F59BC3563497C26BF6E97199833B9B60CEF14B65F7') { throw 'This prototype requires Blood & Truth CUSA11108 version 1.00.' }
