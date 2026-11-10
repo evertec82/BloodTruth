@@ -7,7 +7,7 @@ if (-not $NoGui -and -not $ValidateOnly) {
  Add-Type -AssemblyName System.Drawing
  [Windows.Forms.Application]::EnableVisualStyles()
  $form=New-Object Windows.Forms.Form
- $form.Text='Blood & Truth PC VR - v0.1.1 prototype'
+ $form.Text='Blood & Truth PC VR - v0.1.5 prototype'
  $form.ClientSize=New-Object Drawing.Size(580,260)
  $form.StartPosition='CenterScreen'
  $label=New-Object Windows.Forms.Label
